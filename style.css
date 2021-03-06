@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata&display=swap');
+
+* {
+	margin: 0;
+	padding: 0;
+	border: none;
+	outline: none;
+	box-sizing: border-box;
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+@font-face {
+	font-family: 'DOS';
+	font-style: normal;
+	font-weight: normal;
+	src: local('DOS'), url('DOS.woff') format('woff');
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	max-height: 100%;
+	white-space: pre-wrap;
+	padding: 11px;
+}
+
+#history {
+	width: 100%;
+	height: fit-content;
+}
+
+#prompt {
+	width: 100%;
+	display: flex;
+	flex: 1;
+}
+
+#input {
+	flex: 1;
+	resize: none;
+}
+
+#prompt, #history, #input {
+	background-color: transparent;
+	color: inherit;
+	font-size: inherit;
+	font-family: inherit;
+}
+
+#history .line {
+	display: block;
+}
+
+::-webkit-scrollbar {
+	width: 0px;
+}
