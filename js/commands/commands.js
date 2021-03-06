@@ -5,33 +5,38 @@ import {CONSOLE_COLORS, setTheme, THEMES} from "../console/theme.js";
 import {getNum} from "../utils.js";
 export const COMMANDS = {};
 
+// Helper function to avoid duplication of name property
 function addCommand(name, options) {
 	COMMANDS[name] = new Command(name, options);
 }
 
+// Print all arguments
 addCommand("echo", {
 	code: (_, args) => args.join(" "),
 	shouldPrint: true
 });
 
+// Change directory
 addCommand("cd", {
 	code: navigateTo
 });
 
+// Clear the screen and re-initalize with the startup message
 addCommand("cls", {
 	code: init
 });
 
+// conCATenate the contents of a file to standard out
 addCommand("cat", {
 	code: (stdin, args, {fsObj, flags}) => {
 		let result = fsObj.content;
 		if (flags.bytes !== null) {
 			const bytes = getNum(flags.bytes, {whole: true, positive: true});
-			result = result.substr(0, bytes);
+			result = result.substr(0, bytes); // Read only a certain number of bytes
 		}
 
 		if (flags.endings !== null) {
-			result = result.replace(/\n/g, "$\n") + "$";
+			result = result.replace(/\n/g, "$\n") + "$"; // Append $ to line endings
 		}
 
 		return result;
@@ -46,22 +51,25 @@ addCommand("cat", {
 	}
 });
 
+// Create or update the contents of a file
 addCommand("touch", {
 	code: (stdin, args, {fsObj}) => (fsObj.content = args.slice(1).join(" ")),
 	aliases: ["new", "mkfile"],
 	type: [TYPE.NEW_FILE]
 });
 
+// List the files and directories in a folder
 addCommand("ls", {
 	code: (stdin, args, {fsObj, flags}) => {
 		if (flags.recursive) {
+			// Return a string representation of the recursive listing of fsObj
 			return fsObj.contents.map(x => listRecursive(x)).join("\n");
 		} else {
+			// Return an array of subfile/subfolder names
 			return fsObj.contents.map(f => f.name);
 		}
 	},
-
-	aliases: ["dir"],
+	aliases: ["dir"], // From Windows
 	type: [TYPE.OPERATE_ON_FOLDER],
 	shouldPrint: true,
 	flags: {
@@ -69,10 +77,12 @@ addCommand("ls", {
 	}
 });
 
+// Space every letter in stdin apart with a space character
 addCommand("spaceout", {
 	code: text => text.split("").join(" ")
 });
 
+// Join an array passed from stdin with the arguments as the separator
 addCommand("join", {
 	code: (array, args) => array.join(args.join(" ")),
 	input: [INPUT_TYPE.ARRAY],
@@ -80,12 +90,14 @@ addCommand("join", {
 	shouldPrint: true
 });
 
+// Make a directory at the specified path
 addCommand("md", {
 	code: name => name,
-	aliases: ["md"],
+	aliases: ["mkdir"],
 	type: [TYPE.NEW_FOLDER]
 });
 
+// Repeat stdin [n] times
 addCommand("rep", {
 	code: (stdin, [timesToRepeat, ...str]) => str.join(" ").repeat(timesToRepeat),
 	aliases: ["repeat"],
@@ -93,6 +105,7 @@ addCommand("rep", {
 	stdin: STDIN.AFTER_ARGS
 });
 
+// Print the hexadecimal contents of a file
 addCommand("hexdump", {
 	code: (stdin, args, {fsObj}) => {
 		const rawDump = fsObj.content.split("").map(c => c.charCodeAt(0).toString(16).padStart(2, "0")); // Get bytes
@@ -111,6 +124,7 @@ addCommand("hexdump", {
 	type: [TYPE.OPERATE_ON_FILE]
 });
 
+// Print the binary contents of a file
 addCommand("bindump", {
 	code: (stdin, args, {fsObj}) => {
 		const rawDump = fsObj.content.split("").map(c => c.charCodeAt(0).toString(2).padStart(8, "0")); // Get bytes
@@ -129,6 +143,7 @@ addCommand("bindump", {
 	type: [TYPE.OPERATE_ON_FILE]
 });
 
+// Change the terminal colour to one of the colours defined in theme.js
 addCommand("color", {
 	code: stdin => {
 		const wrongColor = c => {
@@ -146,6 +161,7 @@ addCommand("color", {
 	}
 });
 
+// Set the terminal theme
 addCommand("theme", {
 	code: stdin => {
 		if (stdin.toLowerCase() in THEMES) {
@@ -156,6 +172,8 @@ addCommand("theme", {
 	}
 });
 
+// Evaluate JavaScript code passed as arguments
+// If the result of the evaluation is a function it will be called with standard in
 addCommand("eval", {
 	code: (stdin, args) => {
 		const result = eval(args.join(" "));
@@ -167,6 +185,7 @@ addCommand("eval", {
 	shouldPrint: true
 });
 
+// Map an array passed from stdin with a JavaScript function
 addCommand("map", {
 	code: (stdin, args) => {
 		const result = eval(args.join(" "));
@@ -178,6 +197,7 @@ addCommand("map", {
 	shouldPrint: true
 });
 
+// Reverse an array
 addCommand("flip", {
 	code: array => [...array].reverse(),
 	aliases: ["reverse"],
@@ -186,6 +206,7 @@ addCommand("flip", {
 	shouldPrint: true
 });
 
+// Take the first [n] elements from an array
 addCommand("head", {
 	code: (array, args) => array.slice(0, getNum(args.join(" "), {whole: true, positive: true})),
 	aliases: ["first"],
@@ -194,6 +215,7 @@ addCommand("head", {
 	shouldPrint: true
 });
 
+// Take the last [n] elements from an array
 addCommand("tail", {
 	code: (array, args) => array.slice(-getNum(args.join(" "), {whole: true, positive: true})),
 	aliases: ["last"],

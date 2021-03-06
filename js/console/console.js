@@ -8,27 +8,28 @@ const history = document.getElementById("history"),
 	prefix = document.getElementById("prefix");
 
 export function run(string) {
-	string = string.replace(/\r/g, ""); // Remove CR if on windows
-
-	printWithPrefix(string);
-	if (/^[ \t\n]*$/.test(string)) return;
-
+	printWithPrefix(string); // Print the command out to the history
+	if (/^[ \t\n]*$/.test(string)) return; // Blank lines do nothing
+	
+	// Parsing beforehand allows catching silly errors like non-terminating quotes
 	const pipeChain = parseCommand(string.trim());
 
 	let stdout = "",
 		handler;
 
-	const placeholders = arg => arg.replace(/\r(.+?)\r/g, (_, name) => eval(name));
+	const replacePlaceholders = arg => arg.replace(/\r(.+?)\r/g, (_, name) => eval(name));
 
 	for (const {command, args, flags} of pipeChain) {
 		handler = getHandler(command);
 
+		// Handle bad commands
 		if (handler === null) {
-			error(`Unknown command '${command}'`);
+			printError(`Unknown command '${command}'`);
 			return;
 		}
 
-		stdout = handler.run(stdout, args.map(placeholders), flags);
+		// In every argument, '\r[code]\r' will be evaluated and replaced with the result of the evaluation
+		stdout = handler.run(stdout, args.map(replacePlaceholders), flags);
 	}
 
 	if (handler.shouldPrint) {
@@ -37,6 +38,11 @@ export function run(string) {
 	}
 }
 
+/**
+ * Get the command handler based on a command name
+ * @param {string} name Name of the command
+ * @returns The handler for name. If it does not exist returns null
+ */
 export function getHandler(name) {
 	name = name.toLowerCase();
 	if (name in COMMANDS) return COMMANDS[name];
@@ -58,7 +64,7 @@ export function clear() {
 	return "";
 }
 
-export function error(message) {
+export function printError(message) {
 	printJSON({
 		text: message,
 		color: "red"
@@ -100,7 +106,7 @@ export function updatePrompt() {
 export function init() {
 	clear();
 	updatePrompt();
-	print("WebCMD v2.51");
+	print("WebCMD v2.52");
 }
 
 init();

@@ -29,6 +29,7 @@ const DEFAULT_OPTIONS = {
 	input: [INPUT_TYPE.STRING],
 	aliases: [],
 	flags: {},
+	trimArgs: true,
 	type: []
 };
 
@@ -74,6 +75,10 @@ export class Command {
 	}
 
 	run(stdin, args, flags) {
+		if (this.trimArgs) {
+			args = args.filter(a => !/^[ \t]*$/.test(a));
+		}
+
 		if (this.input.includes(INPUT_TYPE.ARRAY)) {
 			if (!Array.isArray(stdin) && !this.input.includes(INPUT_TYPE.STRING)) {
 				throw new CommandError(`${this.name} can only be passed an array`);

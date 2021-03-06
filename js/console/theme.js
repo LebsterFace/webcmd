@@ -1,32 +1,53 @@
 export const THEMES = {
+	// Default theme inspired by the Windows `cmd.exe`
 	default: {
 		backgroundColor: "#000",
 		textColor: "#0f0",
 		fontFamily: "DOS, monospace",
 		fontSize: "18px"
 	},
+	// https://eugeny.github.io/terminus/
 	terminus: {
 		backgroundColor: "rgb(26, 36, 46)",
 		textColor: "#fff",
 		fontFamily: "Fira Code",
 		fontSize: "14px"
 	},
+	// https://plsbuymydepression.com/things/terminal/
 	"so_v_ette": {
 		backgroundColor: "#0c0c0c",
 		textColor: "rgb(118, 118, 118)",
 		fontFamily: "Inconsolata, 'Courier New', Courier, monospace",
 		fontSize: "1.125em"
+	},
+	// Bit outlandish but looks kind of nice?
+	"papier": {
+		backgroundColor: "#0a0a0a",
+		textColor: "#dfdfdf",
+		fontFamily: '"Times New Roman", Times, serif',
+		fontSize: "2em"
+	},
+	// Why not?
+	"fugly": {
+		backgroundColor: "orange",
+		textColor: "magenta",
+		fontFamily: '"Comic Sans MS", cursive',
+		fontSize: "1.5em",
 	}
 };
 
+// The current theme has to be retained so that the `color` command can
+// modify only the colours of the theme without touching the font
 const CURRENT_THEME = Object.assign({}, THEMES.default);
 
 export function setTheme({textColor, backgroundColor, fontFamily, fontSize}) {
+	// Each param is optional
 	if (textColor) CURRENT_THEME.textColor = textColor;
 	if (backgroundColor) CURRENT_THEME.backgroundColor = backgroundColor;
 	if (fontFamily) CURRENT_THEME.fontFamily = fontFamily;
 	if (fontSize) CURRENT_THEME.fontSize = fontSize;
 
+	// Apply the css
     document.getElementById("theme").innerHTML = `body {
         background-color: ${CURRENT_THEME.backgroundColor};
         color: ${CURRENT_THEME.textColor};
@@ -40,6 +61,7 @@ export function setTheme({textColor, backgroundColor, fontFamily, fontSize}) {
     }`;
 }
 
+// From Windows `cmd.exe`
 export const CONSOLE_COLORS = {
 	"0": "rgb(0,0,0)",
 	"1": "rgb(0,0,128)",
