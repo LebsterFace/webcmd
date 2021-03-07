@@ -16,14 +16,18 @@ export class FileError extends Error {
  */
 export class Folder {
 	constructor(name, contents) {
-		name = name.trim().replace(/ |\t|\n|\r/g, "_");
-		validateFolderName(name);
-		this.name = name;
+		this.setName(name);
 		this.contents = contents;
 		this.parent = null;
 		this.isRoot = false;
 
 		this.contents.forEach(o => (o.parent = this));
+	}
+
+	setName(value) {
+		value = value.trim().replace(/ |\t|\n|\r/g, "_");
+		validateFolderName(value);
+		this.name = value;
 	}
 
 	getParent() {
@@ -150,12 +154,16 @@ export class Folder {
  */
 export class File {
 	constructor(name, content) {
-		name = name.trim().replace(/ |\t|\n|\r/g, "_");
-		validateFileName(name);
-		this.name = name;
+		this.setName(name);
 		this.parent = null;
 		this.rawBytes = null;
 		this.content = content;
+	}
+
+	setName(value) {
+		value = value.trim().replace(/ |\t|\n|\r/g, "_");
+		validateFileName(value);
+		this.name = value;
 	}
 
 	set content(newContent) {

@@ -251,7 +251,7 @@ addCommand("rm", {
 
 // Rename a file / folder
 addCommand("rename", {
-	code: (stdin, args, {fsObj}) => (fsObj.name = args.slice(1).join(" ")),
+	code: (stdin, args, {fsObj}) => (fsObj.setName(args.slice(1).join(" "))),
 	aliases: ["rn", "name"],
 	type: [TYPE.OPERERATE_ON_FS],
 	stdin: STDIN.SEPERATE,
