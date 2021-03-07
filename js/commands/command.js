@@ -22,7 +22,7 @@ export const INPUT_TYPE = {
 
 const DEFAULT_OPTIONS = {
 	code: () => {
-		throw new Error("No function specified!");
+		throw new Error("No function specified.");
 	},
 	shouldPrint: false,
 	stdin: STDIN.OR_ARGS,

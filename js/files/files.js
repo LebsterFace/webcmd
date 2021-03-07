@@ -174,11 +174,11 @@ export class DynamicFile extends File {
 }
 
 function validateFileName(name) {
-	if (name === "") throw new FileError("Name cannot be blank!");
-	if (/[`'"?!+\[\]{}:;~\/\\]/g.test(name)) throw new FileError("Name cannot contain special characters!");
+	if (name === "") throw new FileError("Name cannot be blank");
+	if (/[`'"?!+\[\]{}:;~\/\\]/g.test(name)) throw new FileError("Name cannot contain special characters");
 }
 
 function validateFolderName(name) {
 	validateFileName(name);
-	if (/[\.]/g.test(name)) throw new FileError("Name cannot contain period!");
+	if (/[\.]/g.test(name)) throw new FileError("Name cannot contain period");
 }

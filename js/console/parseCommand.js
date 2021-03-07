@@ -43,7 +43,7 @@ export function parseCommand(string) {
 			if (i + 1 === string.length) {
 				// Quad backslash for JS
 				// TODO: Some pointer '^' for where the error occoured in the string
-				throw new Error(`No character to escape! Did you mean '\\\\'?`);
+				throw new Error("No character to escape! Did you mean '\\\\'?");
 			}
 
 			const nextChar = string[++i];
@@ -102,7 +102,7 @@ export function parseCommand(string) {
 	handleFlag();
 
 	if (inString !== null) {
-		throw new Error(`Non-terminating string!`);
+		throw new Error("Non-terminating string in command");
 	}
 
 	for (const C of commands) C.command = C.args.shift().trim();
