@@ -133,6 +133,16 @@ export class Folder {
 		for (const folderName of path.split("/")) currentPos = currentPos.getOrCreateFolder(folderName);
 		return currentPos;
 	}
+
+	delete() {
+		if (this.isRoot) {
+			throw new Error("Cannot delete root folder!");
+		}
+
+		const myIndex = this.parent.contents.findIndex(c => c === this);
+		this.parent.contents.splice(myIndex, 1);
+		return null;
+	}
 }
 
 /**
@@ -205,6 +215,12 @@ export class File {
 
 	getPathString() {
 		return this.getPath().join("/");
+	}
+
+	delete() {
+		const myIndex = this.parent.contents.findIndex(c => c === this);
+		this.parent.contents.splice(myIndex, 1);
+		return null;
 	}
 }
 

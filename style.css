@@ -53,6 +53,8 @@ body {
 
 #history .line {
 	display: block;
+	word-break: break-all;
+	white-space: pre-wrap;
 }
 
 ::-webkit-scrollbar {

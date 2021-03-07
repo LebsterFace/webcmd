@@ -7,6 +7,8 @@ export const root = new Folder("root", [
 	new Folder("dev", [
 		// Kibibyte of random ASCII characters
 		new File("asciikb", () => Array.from({length: 1024}, x => String.fromCharCode(randomInt(32, 126))).join("")),
+		// Kibibyte of random bytes
+		new File("randomkb", () => Uint8Array.from({length: 1024}, x => randomInt(0, 255))),
 		// Random integer from 0 - 1000000
 		new File("integer", () => Math.round(Math.random() * 1000000).toString())
 	]),

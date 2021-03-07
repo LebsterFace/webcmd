@@ -12,7 +12,8 @@ export const TYPE = {
 	NEW_FILE: 1,
 	NEW_FOLDER: 2,
 	OPERATE_ON_FILE: 3,
-	OPERATE_ON_FOLDER: 4
+	OPERATE_ON_FOLDER: 4,
+	OPERERATE_ON_FS: 5
 };
 
 export const INPUT_TYPE = {
@@ -117,6 +118,9 @@ export class Command {
 			} else {
 				throw new CommandError(`${this.name} can only be called on a folder`);
 			}
+		} else if (this.type.includes(TYPE.OPERERATE_ON_FS)) {
+			const folder = getCurrentFolder().getAtPath(args[0]);
+			opts.fsObj = folder;
 		}
 
 		return this.code(stdin, args, opts);

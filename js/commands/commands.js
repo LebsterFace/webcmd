@@ -1,6 +1,6 @@
 import {Command, INPUT_TYPE, STDIN, TYPE} from "./command.js";
-import {init} from "../console/console.js";
-import {formatSize, listRecursive, navigateTo} from "../files/filesys.js";
+import {init, print} from "../console/console.js";
+import {formatSize, getCurrentFolder, listRecursive, navigateTo} from "../files/filesys.js";
 import {CONSOLE_COLORS, setTheme, THEMES} from "../console/theme.js";
 import {getNum} from "../utils.js";
 export const COMMANDS = {};
@@ -107,30 +107,34 @@ addCommand("rep", {
 
 // Print the hexadecimal contents of a file
 addCommand("hexdump", {
-	code: (stdin, args, {fsObj}) => {
+	code: (stdin, args, {fsObj, flags}) => {
 		const rawDump = Array.from(fsObj.content).map(c => c.toString(16).padStart(2, "0")), // Get bytes
 			stringContent = fsObj.contentString, // Get text
 			charsPerRow = fsObj.isUnicode ? 8 : 32;
 
 		let result = `${rawDump.length.toLocaleString("en-GB")} bytes (${formatSize(rawDump.length)})\n`; // Header
-		
+
 		for (let i = 0; i < rawDump.length; i += 32) {
 			const row = rawDump.slice(i, i + 32); // Get 1 row
 			row.splice(16, 0, " "); // Insert space at element #16
 			result += i.toString(16).padStart(8, "0") + "| " + row.join(" ").padEnd(97, " "); // Append byte row
-			result += " |" + stringContent.substring(i, i + charsPerRow).padEnd(charsPerRow, " ") + "|"; // Append text section
+			if (flags.text) result += " |" + stringContent.substring(i, i + charsPerRow).padEnd(charsPerRow, " ") + "|"; // Append text section
 			result += "\n";
 		}
 
 		return result;
 	},
 	shouldPrint: true,
-	type: [TYPE.OPERATE_ON_FILE]
+	type: [TYPE.OPERATE_ON_FILE],
+	flags: {
+		text: ["t", "ch", "c"]
+	}
 });
 
 // Print the binary contents of a file
 addCommand("bindump", {
 	code: (stdin, args, {fsObj}) => {
+		// console.log(Array.from(fsObj.content).map(e => e.toString(2).padStart(8, "0")).join(" "));
 		return "Currently being reworked...";
 		// const rawDump = fsObj.content.split("").map(c => c.charCodeAt(0).toString(2).padStart(8, "0")); // Get bytes
 		// let result = `${fsObj.content.length.toLocaleString("en-GB")} bytes (${formatSize(fsObj.content.length)})\n`; // Header
@@ -227,4 +231,29 @@ addCommand("tail", {
 	stdin: STDIN.SEPERATE,
 	input: [INPUT_TYPE.ARRAY],
 	shouldPrint: true
+});
+
+// Delete a file / folder
+addCommand("rm", {
+	code: (stdin, args, {fsObj, flags}) => {
+		const name = fsObj.name;
+		if (flags.verbose) print(`Deleting ${name}...`);
+		fsObj.delete();
+		if (flags.verbose) print("Done!");
+		return name;
+	},
+	aliases: ["del", "rd", "remove", "delete", "rmdir"],
+	flags: { verbose: ["v", "vb"] },
+	type: [TYPE.OPERERATE_ON_FS],
+	stdin: STDIN.SEPERATE,
+	shouldPrint: false
+});
+
+// Rename a file / folder
+addCommand("rename", {
+	code: (stdin, args, {fsObj}) => (fsObj.name = args.slice(1).join(" ")),
+	aliases: ["rn", "name"],
+	type: [TYPE.OPERERATE_ON_FS],
+	stdin: STDIN.SEPERATE,
+	shouldPrint: false
 });
