@@ -2,12 +2,12 @@
 A linux-style command prompt for the web. Built with vanilla JavaScript. [Try it online!](https://lebster.xyz/projects/webcmd)
 
 ## Features
- - [Full File System](#Full%20File%20System)
- - [Command Flags](#Command%20Flags)
- - [Custom Themes](#Custom%20Themes)
- - [Command Piping](#Command%20Piping)
- - [Dynamic Files](#Dynamic%20Files)
- - [Array Results](#Array%20Results)
+ - [Full File System](#full-file-system)
+ - [Command Flags](#command-flags)
+ - [Custom Themes](#custom-themes)
+ - [Command Piping](#command-piping)
+ - [Dynamic Files](#dynamic-files)
+ - [Array Results](#array-results)
 
 ### Full File System
 WebCMD includes a full file system. You can create or delete files and directories, navigate via terminal commands and more!
