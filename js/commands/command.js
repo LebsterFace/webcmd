@@ -36,6 +36,7 @@ const DEFAULT_OPTIONS = {
 export class CommandError extends Error {
 	constructor(msg) {
 		super(msg);
+		this.name = "CommandError";
 	}
 }
 

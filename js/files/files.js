@@ -1,7 +1,8 @@
 import {root} from "./filesys.js";
 
-// Oh nooo I have to comment this!!!
-
+/**
+ * Error in the filesystem
+ */
 export class FileError extends Error {
 	constructor(message) {
 		super(message);
@@ -9,6 +10,9 @@ export class FileError extends Error {
 	}
 }
 
+/**
+ * Directory which can contain multiple files/folders
+ */
 export class Folder {
 	constructor(name, contents) {
 		name = name.trim().replace(/ |\t|\n|\r/g, "_");
@@ -130,6 +134,9 @@ export class Folder {
 	}
 }
 
+/**
+ * File containing text
+ */
 export class File {
 	constructor(name, content) {
 		name = name.trim().replace(/ |\t|\n|\r/g, "_");
@@ -160,6 +167,10 @@ export class File {
 	}
 }
 
+/**
+ * File which is defiend with a contentFunction.
+ * The content of the file is dynamically created upon read via the contentFunction
+ */
 export class DynamicFile extends File {
 	constructor(name, contentFunction) {
 		super(name, "");
