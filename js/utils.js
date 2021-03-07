@@ -10,4 +10,11 @@ getNum = (str, options) => {
 	if (options.positive && result < 0) throw new Error("Number cannot be negative");
 
 	return result;
-};
+},
+
+chr = code => {
+	if (code === 0) return "?";
+	return String.fromCharCode(code);
+},
+
+ord = char => char.charCodeAt(0);

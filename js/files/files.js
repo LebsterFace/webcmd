@@ -1,3 +1,4 @@
+import {chr, ord} from "../utils.js";
 import {root} from "./filesys.js";
 
 /**
@@ -142,8 +143,48 @@ export class File {
 		name = name.trim().replace(/ |\t|\n|\r/g, "_");
 		validateFileName(name);
 		this.name = name;
-		this.content = content;
 		this.parent = null;
+		this.rawBytes = null;
+		this.content = content;
+	}
+
+	set content(newContent) {
+		this.isDynamic = false;
+		this.isUnicode = false;
+
+		if (typeof newContent === "function") {
+			this.isDynamic = true;
+			this.rawBytes = newContent;
+		} else {
+			const {unicode, value} = getAsUint8Array(newContent);
+			this.isUnicode = unicode;
+			this.rawBytes = value;
+		}
+
+		return newContent;
+	}
+
+	get content() {
+		if (this.isDynamic) {
+			return getAsUint8Array(this.rawBytes()).value;
+		} else {
+			return this.rawBytes;
+		}
+	}
+
+	set contentString(v) {
+		this.content = v;
+	}
+
+	get contentString() {
+		const byteContent = this.content,
+			dv = new DataView(byteContent.buffer);
+
+		if (this.isUnicode) {
+			return Array.from({length: Math.ceil(byteContent.length / 4)}, (_, i) => chr(dv.getUint32(i * 4))).join("");
+		} else {
+			return Array.from(byteContent).map(chr).join("");
+		}
 	}
 
 	getSize() {
@@ -167,23 +208,6 @@ export class File {
 	}
 }
 
-/**
- * File which is defiend with a contentFunction.
- * The content of the file is dynamically created upon read via the contentFunction
- */
-export class DynamicFile extends File {
-	constructor(name, contentFunction) {
-		super(name, "");
-		this.contentFunction = contentFunction;
-	}
-
-	get content() {
-		return this.contentFunction();
-	}
-
-	set content(v) {}
-}
-
 function validateFileName(name) {
 	if (name === "") throw new FileError("Name cannot be blank");
 	if (/[`'"?!+\[\]{}:;~\/\\]/g.test(name)) throw new FileError("Name cannot contain special characters");
@@ -192,4 +216,28 @@ function validateFileName(name) {
 function validateFolderName(name) {
 	validateFileName(name);
 	if (/[\.]/g.test(name)) throw new FileError("Name cannot contain period");
+}
+
+function getAsUint8Array(toConvert) {
+	// Can we just leave? Great!
+	if (toConvert instanceof Uint8Array) return {value: toConvert, unicode: false};
+
+	if (typeof toConvert === "number") toConvert = toConvert.toString();
+	if (typeof toConvert === "string") {
+		const split = toConvert.split("").map(ord),
+			isUnicode = split.some(e => e > 255);
+
+		const result = new Uint8Array(isUnicode ? toConvert.length * 4 : toConvert.length),
+			dv = new DataView(result.buffer);
+
+		if (isUnicode) {
+			for (let i = 0; i < toConvert.length; i++) dv.setUint32(i * 4, split[i]);
+		} else {
+			for (let i = 0; i < toConvert.length; i++) dv.setUint8(i, split[i]);
+		}
+
+		return {value: result, unicode: isUnicode};
+	}
+
+	throw new Error(`Cannot convert type ${typeof toConvert} to Uint8Array!`);
 }

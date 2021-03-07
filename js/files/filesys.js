@@ -1,14 +1,14 @@
 import {updatePrompt} from "../console/console.js";
 import {randomInt} from "../utils.js";
-import {File, Folder, DynamicFile} from "./files.js";
+import {File, Folder} from "./files.js";
 
 export const root = new Folder("root", [
 	// Dev directory contains developer files
 	new Folder("dev", [
 		// Kibibyte of random ASCII characters
-		new DynamicFile("asciikb", () => Array.from({length: 1024}, x => String.fromCharCode(randomInt(32, 126))).join("")),
+		new File("asciikb", () => Array.from({length: 1024}, x => String.fromCharCode(randomInt(32, 126))).join("")),
 		// Random integer from 0 - 1000000
-		new DynamicFile("integer", () => Math.round(Math.random() * 1000000).toString())
+		new File("integer", () => Math.round(Math.random() * 1000000).toString())
 	]),
 	// User directory contains user-level files
 	new Folder("user", [

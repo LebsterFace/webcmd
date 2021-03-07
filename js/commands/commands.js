@@ -29,7 +29,7 @@ addCommand("cls", {
 // conCATenate the contents of a file to standard out
 addCommand("cat", {
 	code: (stdin, args, {fsObj, flags}) => {
-		let result = fsObj.content;
+		let result = fsObj.contentString;
 		if (flags.bytes !== null) {
 			const bytes = getNum(flags.bytes, {whole: true, positive: true});
 			result = result.substr(0, bytes); // Read only a certain number of bytes
@@ -108,13 +108,17 @@ addCommand("rep", {
 // Print the hexadecimal contents of a file
 addCommand("hexdump", {
 	code: (stdin, args, {fsObj}) => {
-		const rawDump = fsObj.content.split("").map(c => c.charCodeAt(0).toString(16).padStart(2, "0")); // Get bytes
-		let result = `${fsObj.content.length.toLocaleString("en-GB")} bytes (${formatSize(fsObj.content.length)})\n`; // Header
+		const rawDump = Array.from(fsObj.content).map(c => c.toString(16).padStart(2, "0")), // Get bytes
+			stringContent = fsObj.contentString, // Get text
+			charsPerRow = fsObj.isUnicode ? 8 : 32;
+
+		let result = `${rawDump.length.toLocaleString("en-GB")} bytes (${formatSize(rawDump.length)})\n`; // Header
+		
 		for (let i = 0; i < rawDump.length; i += 32) {
 			const row = rawDump.slice(i, i + 32); // Get 1 row
 			row.splice(16, 0, " "); // Insert space at element #16
 			result += i.toString(16).padStart(8, "0") + "| " + row.join(" ").padEnd(97, " "); // Append byte row
-			result += " |" + fsObj.content.substring(i, i + 32).padEnd(32, " ") + "|"; // Append text section
+			result += " |" + stringContent.substring(i, i + charsPerRow).padEnd(charsPerRow, " ") + "|"; // Append text section
 			result += "\n";
 		}
 
@@ -127,17 +131,18 @@ addCommand("hexdump", {
 // Print the binary contents of a file
 addCommand("bindump", {
 	code: (stdin, args, {fsObj}) => {
-		const rawDump = fsObj.content.split("").map(c => c.charCodeAt(0).toString(2).padStart(8, "0")); // Get bytes
-		let result = `${fsObj.content.length.toLocaleString("en-GB")} bytes (${formatSize(fsObj.content.length)})\n`; // Header
-		for (let i = 0; i < rawDump.length; i += 10) {
-			const row = rawDump.slice(i, i + 10); // Get 1 row
-			row.splice(5, 0, " "); // Insert space at element #5
-			result += i.toString(16).padStart(8, "0") + "| " + row.join(" ").padEnd(91, " "); // Append byte row
-			result += " |" + fsObj.content.substring(i, i + 10).padEnd(10, " ") + "|"; // Append text section
-			result += "\n";
-		}
+		return "Currently being reworked...";
+		// const rawDump = fsObj.content.split("").map(c => c.charCodeAt(0).toString(2).padStart(8, "0")); // Get bytes
+		// let result = `${fsObj.content.length.toLocaleString("en-GB")} bytes (${formatSize(fsObj.content.length)})\n`; // Header
+		// for (let i = 0; i < rawDump.length; i += 10) {
+		// 	const row = rawDump.slice(i, i + 10); // Get 1 row
+		// 	row.splice(5, 0, " "); // Insert space at element #5
+		// 	result += i.toString(16).padStart(8, "0") + "| " + row.join(" ").padEnd(91, " "); // Append byte row
+		// 	result += " |" + fsObj.content.substring(i, i + 10).padEnd(10, " ") + "|"; // Append text section
+		// 	result += "\n";
+		// }
 
-		return result;
+		// return result;
 	},
 	shouldPrint: true,
 	type: [TYPE.OPERATE_ON_FILE]

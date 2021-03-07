@@ -1,31 +1,33 @@
 import {printError, run} from "./console/console.js";
-
+		
 const input = document.getElementById("input");
 const commandHistory = [];
 let historyOffset = 0;
+		
+document.onkeydown = e => input.focus();
 
-document.onkeydown = () => input.focus();
 input.onkeydown = function(e) {
+	expandInput();
+
 	// Shift-Enter will enter a regular newline
 	if (e.code === "Enter" && !e.shiftKey) {
 		console.time("Executing Command"); // Debug
-		scrollToBottom();
 		e.preventDefault();
-
+		
 		try {
 			run(input.value.replace(/\r/g, "")); // Remove CR if on windows
 		} catch (er) {
 			printError(er);
 			console.error(er); // Debug!
 		}
-
+		
 		// Don't push duplicate commands to history
 		if (commandHistory[0] !== input.value) commandHistory.unshift(input.value);
 		historyOffset = -1;
 		input.value = "";
 		console.timeEnd("Executing Command"); // Debug
 	}
-	
+			
 	// Increment and decrement the History Offset
 	else if (e.code === "ArrowUp") {
 		historyOffset++;
@@ -39,29 +41,29 @@ input.onkeydown = function(e) {
 
 	expandInput();
 };
-
+		
 input.onkeyup = expandInput;
-
+		
 /**
- * Expand the input textarea to fit its content
- */
+	* Expand the input textarea to fit its content
+	*/
 function expandInput() {
 	input.style.height = "inherit";
-
+		
 	// Compute the height of the input textarea
 	const computed = window.getComputedStyle(input),
 		paddingTop = parseInt(computed.getPropertyValue("padding-top")),
 		paddingBottom = parseInt(computed.getPropertyValue("padding-bottom")),
 		height = paddingTop + input.scrollHeight + paddingBottom;
-
+		
 	// Scale the input textarea
 	input.style.height = height + "px";
 	scrollToBottom();
 }
-
+		
 /**
- * Load the current History Offset command into the input textarea
- */
+	* Load the current History Offset command into the input textarea
+	*/
 function loadHistory() {
 	// Clamp value
 	if (historyOffset < -1) {
@@ -74,17 +76,17 @@ function loadHistory() {
 	else if (historyOffset === -1) {
 		input.value = "";
 	}
-	
+			
 	// Set the textarea content to the appropriate command from history
 	else {
 		input.value = commandHistory[historyOffset];
 		input.setSelectionRange(input.value.length, input.value.length); // Used to make the caret move to the end of the command
 	}
 }
-
+		
 /**
- * Scroll to the bottom of the page
- */
+	* Scroll to the bottom of the page
+	*/
 export function scrollToBottom() {
 	window.scrollTo(0, document.documentElement.scrollHeight);
 }
