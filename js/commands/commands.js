@@ -1,8 +1,9 @@
-import {Command, INPUT_TYPE, STDIN, TYPE} from "./command.js";
+import {Command, CommandError, INPUT_TYPE, STDIN, TYPE} from "./command.js";
 import {init, print} from "../console/console.js";
 import {formatSize, getCurrentFolder, listRecursive, navigateTo} from "../files/filesys.js";
 import {CONSOLE_COLORS, setTheme, THEMES} from "../console/theme.js";
 import {getNum} from "../utils.js";
+import {getStringFromUint8Array} from "../files/files.js";
 export const COMMANDS = {};
 
 // Helper function to avoid duplication of name property
@@ -108,14 +109,15 @@ addCommand("rep", {
 // Print the hexadecimal contents of a file
 addCommand("hexdump", {
 	code: (stdin, args, {fsObj, flags}) => {
-		const rawDump = Array.from(fsObj.content).map(c => c.toString(16).padStart(2, "0")), // Get bytes
-			stringContent = fsObj.contentString, // Get text
+		const rawBytes = fsObj.content,
+			dump = Array.from(rawBytes).map(c => c.toString(16).padStart(2, "0")), // Get bytes
+			stringContent = getStringFromUint8Array(rawBytes), // Get text
 			charsPerRow = fsObj.isUnicode ? 8 : 32;
 
-		let result = `${rawDump.length.toLocaleString("en-GB")} bytes (${formatSize(rawDump.length)})\n`; // Header
+		let result = `${dump.length.toLocaleString("en-GB")} bytes (${formatSize(dump.length)})\n`; // Header
 
-		for (let i = 0; i < rawDump.length; i += 32) {
-			const row = rawDump.slice(i, i + 32); // Get 1 row
+		for (let i = 0; i < dump.length; i += 32) {
+			const row = dump.slice(i, i + 32); // Get 1 row
 			row.splice(16, 0, " "); // Insert space at element #16
 			result += i.toString(16).padStart(8, "0") + "| " + row.join(" ").padEnd(97, " "); // Append byte row
 			if (flags.text) result += " |" + stringContent.substring(i, i + charsPerRow).padEnd(charsPerRow, " ") + "|"; // Append text section
@@ -194,6 +196,27 @@ addCommand("eval", {
 	shouldPrint: true
 });
 
+// Update/Read a dynamic file's function
+addCommand("evalfile", {
+	code: (stdin, args, {fsObj}) => {
+		if (args.length > 1) {
+			const jscode = args.slice(1).join(" "),
+				result = eval(jscode),
+				func = typeof result === "function" ? result : x => (typeof result === "undefined" ? result : null);
+
+			fsObj.content = func;
+			return jscode;
+		} else {
+			if (typeof fsObj.rawBytes !== "function") throw new CommandError(`'${fsObj.name}' is not dynamic.`);
+			return fsObj.rawBytes.toString();
+		}
+	},
+	aliases: ["jsfile", "dynamicfile", "dynfile"],
+	type: [TYPE.NEW_FILE],
+	stdin: STDIN.SEPERATE,
+	shouldPrint: true
+});
+
 // Map an array passed from stdin with a JavaScript function
 addCommand("map", {
 	code: (stdin, args) => {
@@ -243,7 +266,7 @@ addCommand("rm", {
 		return name;
 	},
 	aliases: ["del", "rd", "remove", "delete", "rmdir"],
-	flags: { verbose: ["v", "vb"] },
+	flags: {verbose: ["v", "vb"]},
 	type: [TYPE.OPERERATE_ON_FS],
 	stdin: STDIN.SEPERATE,
 	shouldPrint: false
@@ -251,7 +274,7 @@ addCommand("rm", {
 
 // Rename a file / folder
 addCommand("rename", {
-	code: (stdin, args, {fsObj}) => (fsObj.setName(args.slice(1).join(" "))),
+	code: (stdin, args, {fsObj}) => fsObj.setName(args.slice(1).join(" ")),
 	aliases: ["rn", "name"],
 	type: [TYPE.OPERERATE_ON_FS],
 	stdin: STDIN.SEPERATE,

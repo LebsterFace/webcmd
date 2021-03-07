@@ -195,14 +195,7 @@ export class File {
 	}
 
 	get contentString() {
-		const byteContent = this.content,
-			dv = new DataView(byteContent.buffer);
-
-		if (this.isUnicode) {
-			return Array.from({length: Math.ceil(byteContent.length / 4)}, (_, i) => chr(dv.getUint32(i * 4))).join("");
-		} else {
-			return Array.from(byteContent).map(chr).join("");
-		}
+		return getStringFromUint8Array(this.content, this.isUnicode);
 	}
 
 	getSize() {
@@ -263,5 +256,15 @@ function getAsUint8Array(toConvert) {
 		return {value: result, unicode: isUnicode};
 	}
 
-	throw new Error(`Cannot convert type ${typeof toConvert} to Uint8Array!`);
+	throw new Error(`Cannot convert type ${typeof toConvert} to File!`);
+}
+
+export function getStringFromUint8Array(byteContent, unicode) {
+	const dv = new DataView(byteContent.buffer);
+
+	if (unicode) {
+		return Array.from({length: Math.ceil(byteContent.length / 4)}, (_, i) => chr(dv.getUint32(i * 4))).join("");
+	} else {
+		return Array.from(byteContent).map(chr).join("");
+	}
 }

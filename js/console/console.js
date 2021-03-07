@@ -106,7 +106,7 @@ export function updatePrompt() {
 export function init() {
 	clear();
 	updatePrompt();
-	print("WebCMD v2.6");
+	print("WebCMD v2.62");
 }
 
 init();
