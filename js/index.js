@@ -17,7 +17,9 @@ input.onkeydown = function(e) {
 
 	// Shift-Enter will enter a regular newline
 	if (e.code === "Enter" && !e.shiftKey && isCaretOnLineNo(-1)) {
-		console.time("Executing Command"); // Debug
+		console.log("%c== [ Command Entered ] ==", "color:red");
+		console.log(`%c${input.value}`, "color:#0F0;background:#000");
+		console.time("Total"); // Debug
 		e.preventDefault();
 
 		try {
@@ -31,7 +33,7 @@ input.onkeydown = function(e) {
 		if (commandHistory[0] !== input.value) commandHistory.unshift(input.value);
 		historyOffset = -1;
 		input.value = "";
-		console.timeEnd("Executing Command"); // Debug
+		console.timeEnd("Total"); // Debug
 	}
 	
 	// Increment and decrement the History Offset

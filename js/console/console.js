@@ -12,15 +12,20 @@ export function run(string) {
 	if (/^[ \t\n]*$/.test(string)) return; // Blank lines do nothing
 	
 	// Parsing beforehand allows catching silly errors like non-terminating quotes
+	console.time("Parsing");
 	const pipeChain = parseCommand(string.trim());
+	console.timeEnd("Parsing");
 
 	let stdout = "",
 		handler;
 
 	const replacePlaceholders = arg => arg.replace(/\r(.+?)\r/g, (_, name) => eval(name));
 
+	console.time("Entire command");
 	for (const {command, args, flags} of pipeChain) {
 		handler = getHandler(command);
+		console.log(`\nExecuting single command %c${command}`, "color:#0F0;background:#000");
+		console.time("Single");
 
 		// Handle bad commands
 		if (handler === null) {
@@ -30,7 +35,11 @@ export function run(string) {
 
 		// In every argument, '\r[code]\r' will be evaluated and replaced with the result of the evaluation
 		stdout = handler.run(stdout, args.map(replacePlaceholders), flags);
+		console.timeEnd("Single");
 	}
+
+	console.log("");
+	console.timeEnd("Entire command");
 
 	if (handler.shouldPrint) {
 		if (Array.isArray(stdout)) stdout = stdout.join(" ");
