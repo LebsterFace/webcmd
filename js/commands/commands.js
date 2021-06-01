@@ -3,7 +3,7 @@ import {init, print} from "../console/console.js";
 import {formatSize, getCurrentFolder, listRecursive, navigateTo} from "../files/filesys.js";
 import {CONSOLE_COLORS, setTheme, THEMES} from "../console/theme.js";
 import {getNum} from "../utils.js";
-import {getStringFromUint8Array} from "../files/files.js";
+import {getStringFromUint8Array, fromJSON} from "../files/files.js";
 export const COMMANDS = {};
 
 // Helper function to avoid duplication of name property
@@ -278,5 +278,23 @@ addCommand("rename", {
 	aliases: ["rn", "name"],
 	type: [TYPE.OPERERATE_ON_FS],
 	stdin: STDIN.SEPERATE,
+	shouldPrint: false
+});
+
+// Create command
+addCommand("cmd", {
+	code: (stdin, args, {flags}) => {
+		const cmdName = args.shift(),
+			     code = args.join(" ");
+
+		const raw = eval(code),
+			func = typeof raw === "function" ? raw : _ => raw,
+			options = flags.options ? flags.options : {shouldPrint: true};
+		
+		options.code = func;
+		addCommand(cmdName, options);
+	},
+	aliases: ["newcmd", "command"],
+	flags: {options: ["o", "opt"]},
 	shouldPrint: false
 });

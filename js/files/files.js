@@ -147,6 +147,10 @@ export class Folder {
 		this.parent.contents.splice(myIndex, 1);
 		return null;
 	}
+
+	toJSON() {
+		return {name: this.name, contents: this.contents.map(o => o.toJSON())};
+	}
 }
 
 /**
@@ -223,6 +227,19 @@ export class File {
 		this.parent.contents.splice(myIndex, 1);
 		return null;
 	}
+
+	toJSON() {
+		const result = {name: this.name, isUnicode: this.isUnicode, isDynamic: this.isDynamic};
+
+		if (this.isDynamic) {
+			result.content = this.rawBytes.toString();
+		} else {
+			result.content = Array.from(this.rawBytes);
+			// result.content = this.contentString;
+		}
+
+		return result;
+	}
 }
 
 function validateFileName(name) {
@@ -266,5 +283,19 @@ export function getStringFromUint8Array(byteContent, unicode) {
 		return Array.from({length: Math.ceil(byteContent.length / 4)}, (_, i) => chr(dv.getUint32(i * 4))).join("");
 	} else {
 		return Array.from(byteContent).map(chr).join("");
+	}
+}
+
+export function fromJSON(obj) {
+	if (obj.hasOwnProperty("isDynamic")) {
+		const content = obj.isDynamic ? eval(obj.content) : Uint8Array.from(obj.content);
+		const result = new File(obj.name, content);
+		result.isUnicode = obj.isUnicode;
+		return result;
+	} else {
+		const result = new Folder("folder", obj.contents.map(fromJSON));
+		result.name = obj.name;
+		if (obj.name === "") result.isRoot = true;
+		return result;
 	}
 }

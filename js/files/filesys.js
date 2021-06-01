@@ -1,8 +1,8 @@
 import {updatePrompt} from "../console/console.js";
 import {randomInt} from "../utils.js";
-import {File, Folder} from "./files.js";
+import {File, Folder, fromJSON} from "./files.js";
 
-export const root = new Folder("root", [
+const defaultRoot = new Folder("root", [
 	// Dev directory contains developer files
 	new Folder("dev", [
 		// Kibibyte of random ASCII characters
@@ -19,6 +19,8 @@ export const root = new Folder("root", [
 	])
 ]);
 
+export const root = localStorage.getItem("root") ? fromJSON(JSON.parse(localStorage.getItem("root"))) : defaultRoot;
+
 root.isRoot = true;
 root.name = "";
 
@@ -27,6 +29,13 @@ let currentPath = [];
 
 export function getCurrentFolder() {
 	return currentPath.reduce((acc, cv) => acc.get(cv), root);
+}
+
+/**
+ * Save the root directory to localStorage
+ */
+export function saveRoot() {
+	localStorage.setItem("root", JSON.stringify(root));
 }
 
 /**

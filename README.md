@@ -28,11 +28,11 @@ Some files have their contents automatically re-generated upon reading (for exam
 Commands can return multiple values in the form of an array. These values can then be mapped with a JavaScript function, or can be passed as input to another command via [piping](#Command%Piping).
 
 ## Future plans
- - Binary files
- - More files in the filesystem
- - Custom commands
- - Multiple terminals in one window
- - Data saved in LocalStorage
- - User-controllable sessions which save themes, custom commands + fs
- - Save command history, stdout + text in console in sessions
- - Windows style GUI?
+ - [x] Binary files
+ - [x] Custom commands
+ - [ ] More files in the filesystem
+ - [ ] Multiple terminals in one window
+ - [x] Data saved in LocalStorage
+ - [ ] User-controllable sessions which save themes, custom commands + fs
+ - [ ] Save command history, stdout + text in console in sessions
+ - [ ] Windows style GUI?

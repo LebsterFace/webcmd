@@ -1,4 +1,5 @@
 import {printError, run} from "./console/console.js";
+import {saveRoot} from "./files/filesys.js";
 
 const input = document.getElementById("input");
 const commandHistory = [];
@@ -81,8 +82,8 @@ function expandInput() {
 }
 
 /**
-	* Load the current History Offset command into the input textarea
-	*/
+* Load the current History Offset command into the input textarea
+*/
 function loadHistory(change) {
 	historyOffset += change;
 	// Clamp value
@@ -102,8 +103,10 @@ function loadHistory(change) {
 }
 
 /**
-	* Scroll to the bottom of the page
-	*/
+* Scroll to the bottom of the page
+*/
 export function scrollToBottom() {
 	window.scrollTo(0, document.documentElement.scrollHeight);
 }
+
+window.onbeforeunload = saveRoot;
