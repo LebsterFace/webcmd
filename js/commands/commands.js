@@ -1,4 +1,4 @@
-import {Command, CommandError, INPUT_TYPE, STDIN, TYPE} from "./command.js";
+import {Command, CommandError, ExecutionError, INPUT_TYPE, STDIN, TYPE} from "./command.js";
 import {init, print} from "../console/console.js";
 import {formatSize, getCurrentFolder, listRecursive, navigateTo} from "../files/filesys.js";
 import {CONSOLE_COLORS, setTheme, THEMES} from "../console/theme.js";
@@ -229,12 +229,34 @@ addCommand("map", {
 	shouldPrint: true
 });
 
-// Reverse an array
-addCommand("flip", {
-	code: array => [...array].reverse(),
-	aliases: ["reverse"],
+// Filter an array passed from stdin with a JavaScript function
+addCommand("filter", {
+	code: (stdin, args) => stdin.filter(eval(args.join(" "))),
+	aliases: [],
 	stdin: STDIN.SEPERATE,
 	input: [INPUT_TYPE.ARRAY],
+	shouldPrint: true
+});
+
+// Reduce an array passed from stdin with a JavaScript function
+addCommand("reduce", {
+	code: (stdin, args, {flags}) => stdin.reduce(eval(args.join(" ")), eval(flags.initial)),
+	aliases: [],
+	flags: {initial: ["init", "i", "start", "starting", "s"]},
+	stdin: STDIN.SEPERATE,
+	input: [INPUT_TYPE.ARRAY],
+	shouldPrint: true
+});
+
+// Reverse an array or string
+addCommand("flip", {
+	code: obj => {
+		const reversed = [...obj].reverse();
+		return Array.isArray(obj)  ? reversed : reversed.join("");
+	},
+	aliases: ["reverse"],
+	stdin: STDIN.SEPERATE,
+	input: [INPUT_TYPE.ARRAY, INPUT_TYPE.STRING],
 	shouldPrint: true
 });
 
@@ -252,6 +274,33 @@ addCommand("tail", {
 	code: (array, args) => array.slice(-getNum(args.join(" "), {whole: true, positive: true})),
 	aliases: ["last"],
 	stdin: STDIN.SEPERATE,
+	input: [INPUT_TYPE.ARRAY],
+	shouldPrint: true
+});
+
+// Get the elements at the provided index/indicies from an array
+addCommand("grab", {
+	code: (array, args) => {
+		const result = [];
+		for (const str of args) {
+			const index = parseInt(str);
+			if (isNaN(index)) throw new ExecutionError(`Invalid index '${str}'`);
+			else if (index < 0 || index >= array.length) throw new ExecutionError("Array index out of bounds.");
+			result.push(array[index]);
+		}
+		return result;
+	},
+	aliases: ["at", "index", "item", "items"],
+	stdin: STDIN.SEPERATE,
+	input: [INPUT_TYPE.ARRAY],
+	shouldPrint: true
+});
+
+// Get the entries of an array
+addCommand("entries", {
+	code: arr => Array.from(arr.entries()),
+	aliases: [],
+	stdin: STDIN.OR_ARGS,
 	input: [INPUT_TYPE.ARRAY],
 	shouldPrint: true
 });
@@ -289,8 +338,8 @@ addCommand("cmd", {
 
 		const raw = eval(code),
 			func = typeof raw === "function" ? raw : _ => raw,
-			options = flags.options ? flags.options : {shouldPrint: true};
-		
+			options = flags.options ? JSON.parse(flags.options) : {shouldPrint: true};
+
 		options.code = func;
 		addCommand(cmdName, options);
 	},

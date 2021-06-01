@@ -85,6 +85,7 @@ export function print(text) {
 	return printJSON({text});
 }
 
+// TODO: Multiple colours on one line
 export function printJSON(obj) {
 	const spanElement = document.createElement("span"),
 		textElement = document.createTextNode(obj.text);
@@ -105,6 +106,7 @@ export function printJSON(obj) {
 
 	history.appendChild(spanElement);
 	scrollToBottom();
+
 	return obj.text;
 }
 

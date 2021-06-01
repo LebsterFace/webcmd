@@ -5,7 +5,8 @@ export const STDIN = {
 	SEPERATE: 1,
 	BEFORE_ARGS: 2,
 	AFTER_ARGS: 3,
-	OR_ARGS: 4
+	OR_ARGS_STR: 4,
+	OR_ARGS: 5
 };
 
 export const TYPE = {
@@ -26,7 +27,7 @@ const DEFAULT_OPTIONS = {
 		throw new Error("No function specified.");
 	},
 	shouldPrint: false,
-	stdin: STDIN.OR_ARGS,
+	stdin: STDIN.OR_ARGS_STR,
 	input: [INPUT_TYPE.STRING],
 	aliases: [],
 	flags: {},
@@ -38,6 +39,13 @@ export class CommandError extends Error {
 	constructor(msg) {
 		super(msg);
 		this.name = "CommandError";
+	}
+}
+
+export class ExecutionError extends Error {
+	constructor(msg) {
+		super(msg);
+		this.name = "ExecutionError";
 	}
 }
 
@@ -91,11 +99,15 @@ export class Command {
 
 		const opts = {flags: this.normalizeFlags(flags)};
 
-		if (this.stdin === STDIN.OR_ARGS) {
-			if (stdin === "") {
-				stdin = args.join(" ");
+		if (stdin === "") {
+			if (this.stdin === STDIN.OR_ARGS_STR) {
+				if (stdin === "") stdin = args.join(" ");
+			} else if (this.stdin === STDIN.OR_ARGS) {
+				if (stdin === "") stdin = args;
 			}
-		} else if (this.stdin === STDIN.BEFORE_ARGS) {
+		}
+		
+		if (this.stdin === STDIN.BEFORE_ARGS) {
 			args.unshift(stdin);
 		} else if (this.stdin === STDIN.AFTER_ARGS) {
 			args.push(stdin);
