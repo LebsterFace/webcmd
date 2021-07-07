@@ -29,7 +29,9 @@ export function run(string) {
 
 		// Handle bad commands
 		if (handler === null) {
+			console.timeEnd("Single");
 			printError(`Unknown command '${command}'`);
+			console.timeEnd("Entire command");
 			return;
 		}
 
