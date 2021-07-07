@@ -10,7 +10,7 @@ const history = document.getElementById("history"),
 export function run(string) {
 	printWithPrefix(string); // Print the command out to the history
 	if (/^[ \t\n]*$/.test(string)) return; // Blank lines do nothing
-	
+
 	// Parsing beforehand allows catching silly errors like non-terminating quotes
 	console.time("Parsing");
 	const pipeChain = parseCommand(string.trim());
@@ -75,41 +75,84 @@ export function clear() {
 	return "";
 }
 
-export function printError(message) {
-	printJSON({
-		text: message,
-		color: "red"
-	});
-	return message;
+export function printError(text) {
+	return printJSON([{text, color: "red"}]);
 }
 
 export function print(text) {
-	return printJSON({text});
+	return printJSON([{text}]);
 }
 
-// TODO: Multiple colours on one line
-export function printJSON(obj) {
-	const spanElement = document.createElement("span"),
-		textElement = document.createTextNode(obj.text);
+export function parseFormattedString(text) {
+	const parsed = [];
+	let escaped = false,
+		last = "";
 
-	spanElement.appendChild(textElement);
-
-	if (typeof obj.color === "string") {
-		spanElement.style.color = obj.color;
+	for (let i = 0; i < text.length; i++) {
+		const char = text.charAt(i);
+		if (escaped) {
+			last += char;
+		} else if (char === "\\") {
+			escaped = true;
+		} else if (char === "§") {
+			const match = text.slice(i).match(/^§(.+?)\[(.*?)\]/s);
+			if (match === null) last += char;
+			parsed.push(last);
+			last = "";
+			parsed.push({type: match[1], content: match[2]});
+			i += match[0].length - 1;
+		} else {
+			last += char;
+		}
 	}
 
-	if (typeof obj.background === "string") {
-		spanElement.style.backgroundColor = obj.background;
+	parsed.push(last);
+	return parsed.filter(n => typeof n === "object" || n.length > 0);
+}
+
+export function printFormatted(text) {
+	const parsed = parseFormattedString(text),
+		state = {},
+		result = [];
+
+	const getResultElement = element => {
+		return {...state, text: element};
+	};
+
+	for (const element of parsed) {
+		if (typeof element === "string") {
+			result.push(getResultElement(element));
+		} else {
+			state[element.type] = element.content;
+		}
 	}
 
-	if (typeof obj.noflush !== "boolean" || !obj.noflush) {
-		spanElement.classList.add("line");
+	printJSON(result);
+}
+
+export function printJSON(objects, flush = true) {
+	const container = document.createElement("span");
+	if (flush) container.classList.add("line");
+
+	for (const obj of objects) {
+		const spanElement = document.createElement("span"),
+			textElement = document.createTextNode(obj.text);
+
+		spanElement.appendChild(textElement);
+
+		if (typeof obj.color === "string") {
+			spanElement.style.color = obj.color;
+		}
+
+		if (typeof obj.background === "string") {
+			spanElement.style.backgroundColor = obj.background;
+		}
+
+		container.appendChild(spanElement);
 	}
 
-	history.appendChild(spanElement);
+	history.appendChild(container);
 	scrollToBottom();
-
-	return obj.text;
 }
 
 export function updatePrompt() {
