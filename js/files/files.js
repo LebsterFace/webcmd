@@ -182,8 +182,6 @@ export class File {
 			this.isUnicode = unicode;
 			this.rawBytes = value;
 		}
-
-		return newContent;
 	}
 
 	get content() {
