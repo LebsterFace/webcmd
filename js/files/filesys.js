@@ -1,6 +1,6 @@
 import {updatePrompt} from "../console/console.js";
 import {randomInt} from "../utils.js";
-import {File, Folder, fromJSON} from "./files.js";
+import {File, FileError, Folder, fromJSON} from "./files.js";
 
 const defaultRoot = new Folder("root", [
 	// Dev directory contains developer files
@@ -20,7 +20,6 @@ const defaultRoot = new Folder("root", [
 ]);
 
 export const root = localStorage.getItem("root") ? fromJSON(JSON.parse(localStorage.getItem("root"))) : defaultRoot;
-
 root.isRoot = true;
 root.name = "";
 
@@ -44,10 +43,16 @@ export function saveRoot() {
  * @returns New current path
  */
 export function navigateTo(path) {
-	//                   Ew!!! Please make this nicer or something
-	currentPath = getCurrentFolder().getAtPath(path).getPath().slice(1);
-	updatePrompt();
-	return getCurrentFolder().getPathString();
+	const fsObj = getCurrentFolder().getAtPath(path);
+	if (fsObj instanceof Folder) {
+		// Slice to remove leading "" (for root folder)
+		// FIXME: Should getPath() include the root?
+		currentPath = fsObj.getPath().slice(1);
+		updatePrompt();
+		return fsObj.getPathString();
+	} else {
+		throw new FileError("Attempting to navigate into a non-folder!");
+	}
 }
 
 /**
