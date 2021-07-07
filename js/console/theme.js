@@ -62,6 +62,7 @@ export function setTheme({textColor, backgroundColor, fontFamily, fontSize}) {
 }
 
 // From Windows `cmd.exe`
+// TODO: Per-theme?
 export const CONSOLE_COLORS = {
 	"0": "rgb(0,0,0)",
 	"1": "rgb(0,0,128)",
