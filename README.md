@@ -1,5 +1,5 @@
 # WebCMD
-A linux-style command prompt for the web. Built with vanilla JavaScript. [Try it online!](https://lebster.xyz/projects/webcmd)
+A linux-inspired command prompt for the web. Built with vanilla JavaScript. [Try it online!](https://lebster.xyz/projects/webcmd)
 
 ## Features
  - [Full File System](#full-file-system)
